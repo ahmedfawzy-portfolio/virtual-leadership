@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Leading Virtual Teams | Ahmed Mohamed</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; }
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, #161b22 0%, #0d1117 100%); text-align: center; }
+        .title { font-size: 4rem; color: #58a6ff; margin: 0; text-transform: uppercase; }
+        .badge { background: #238636; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; margin-top: 10px; display: inline-block; }
+        .section { padding: 80px 10%; border-bottom: 1px solid #30363d; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
+        .card { background: #161b22; border: 1px solid #30363d; padding: 30px; border-radius: 15px; transition: 0.3s; }
+        .card:hover { border-color: #58a6ff; transform: translateY(-10px); }
+        #globe-3d { height: 600px; width: 100%; }
+        .highlight { color: #d2a8ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1 class="title">Leading Virtual Teams</h1>
+    <p style="font-size: 1.5rem;">إستراتيجيات قيادة الفرق الافتراضية في عصر البيانات</p>
+    <div class="badge">Ahmed Mohamed | Data Analyst (DEPI)</div>
+    <p style="margin-top: 40px; color: #8b949e;">"تخيل لو قلت لك إنك ممكن تدير شركة كاملة وأنت قاعد في بيتك بتشرب قهوتك؟"</p>
+</div>
+
+<div class="section">
+    <h2 style="text-align: center; color: #58a6ff;">الرؤية العالمية (3D Network)</h2>
+    <div id="globe-3d"></div>
+</div>
+
+<div class="section">
+    <h2 style="text-align: center;">محتوى العرض (من واقع ملفك)</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>لماذا الآن؟</h3>
+            <p>التحول العالمي مابقاش اختياري. القيادة الافتراضية هي المهارة الأساسية في <span class="highlight">القرن الـ 21</span>.</p>
+        </div>
+        <div class="card">
+            <h3>إدارة النتائج</h3>
+            <p>التركيز على <span class="highlight">المخرجات</span> بدلاً من مراقبة الحضور. الثقة هي العملة الجديدة.</p>
+        </div>
+        <div class="card">
+            <h3>التحديات</h3>
+            <p>فجوة التواصل والعزلة. حلنا هو <span class="highlight">تحليل البيانات</span> لفهم أداء الفريق بعمق.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    var data = [{
+        type: 'scattergeo',
+        lon: [31.23, -0.12, 139.65],
+        lat: [30.04, 51.50, 35.67],
+        text: ['Cairo', 'London', 'Tokyo'],
+        mode: 'markers+lines',
+        marker: { size: 15, color: '#58a6ff' },
+        line: { width: 2, color: '#00ffcc' }
+    }];
+    var layout = {
+        geo: { projection: { type: 'orthographic' }, bgcolor: 'black', showland: true, landcolor: '#24292e' },
+        paper_bgcolor: 'black', margin: { l: 0, r: 0, t: 0, b: 0 }
+    };
+    Plotly.newPlot('globe-3d', data, layout);
+</script>
+
+</body>
+</html>

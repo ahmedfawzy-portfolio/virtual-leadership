@@ -3,118 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Command Center | Ahmed Mohamed</title>
+    <title>NEURAL COMMAND | AHMED MOHAMED</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #58a6ff; --bg: #0d1117; --card-bg: #161b22; --border: #30363d; }
-        body { margin: 0; background-color: var(--bg); color: #c9d1d9; font-family: 'Inter', sans-serif; overflow: hidden; }
+        :root { --neon-blue: #00f3ff; --neon-green: #00ff9d; --bg-dark: #020508; --panel-bg: rgba(10, 20, 30, 0.85); }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-dark); color: var(--neon-blue); font-family: 'Share Tech Mono', monospace; overflow: hidden; }
         
-        .dashboard { display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
-        
-        /* Sidebar Styles */
-        .sidebar { background: var(--card-bg); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-        .sidebar h2 { color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .team-link { 
-            padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); 
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px;
-        }
-        .team-link:hover { background: #21262d; border-color: var(--primary); }
-        .status { width: 8px; height: 8px; border-radius: 50%; background: #238636; }
+        #three-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
 
-        /* Main Content */
-        .main-view { position: relative; display: flex; flex-direction: column; }
-        #globe-3d { flex-grow: 1; background: #000; }
+        .ui-overlay { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 80px 1fr 200px; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; pointer-events: none; }
+        .panel { background: var(--panel-bg); border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 4px; pointer-events: all; position: relative; overflow: hidden; backdrop-filter: blur(10px); }
+        .panel::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); animation: scan 3s linear infinite; }
+        @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-        /* Floating Info Panel */
-        .info-panel {
-            position: absolute; bottom: 20px; right: 20px; background: rgba(22, 27, 34, 0.9);
-            border: 1px solid var(--primary); padding: 20px; border-radius: 12px; width: 350px;
-            backdrop-filter: blur(10px); display: none; z-index: 1000;
-        }
+        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-family: 'Orbitron'; border-bottom: 2px solid var(--neon-blue); }
+        .system-status { display: flex; gap: 20px; font-size: 0.8rem; }
+        .status-node { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+
+        .left-panel { grid-row: 2 / 3; display: flex; flex-direction: column; gap: 10px; }
+        .team-node { padding: 15px; border-left: 3px solid transparent; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); }
+        .team-node:hover { background: rgba(0, 243, 255, 0.1); border-left-color: var(--neon-blue); }
         
-        .header { padding: 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .badge { background: #388bfd26; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
+        .main-viewport { grid-column: 2 / 3; grid-row: 2 / 3; position: relative; border: 1px solid rgba(0, 243, 255, 0.1); }
+        #globe-3d { width: 100%; height: 100%; }
+
+        .right-panel { grid-row: 2 / 3; display: flex; flex-direction: column; gap: 10px; }
+        .data-stream { font-size: 0.7rem; color: var(--neon-green); height: 150px; overflow: hidden; position: relative; }
+
+        .bottom-panel { grid-column: 1 / 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        
+        .glitch { animation: glitch 1s linear infinite; }
+        @keyframes glitch { 2% { transform: skew(2deg); } 5% { transform: skew(-2deg); } 10% { transform: skew(0deg); } }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="sidebar">
-        <h2>GLOBAL LOCATIONS</h2>
-        <div class="team-link" onclick="flyTo(30.04, 31.23, 'Cairo HQ', 'Sarah Ahmed - Operations Manager')">
-            <div class="status"></div> <span>Cairo HQ (Egypt)</span>
+    <canvas id="three-canvas"></canvas>
+
+    <div class="ui-overlay">
+        <div class="panel header">
+            <div style="letter-spacing: 5px;">CORE_LEADERSHIP_OS [v4.0.1]</div>
+            <div style="text-align: center;">
+                <div style="font-size: 1.5rem; color: #fff;">LEADING VIRTUAL TEAMS</div>
+                <div style="font-size: 0.7rem;">DEPI DATA ANALYSIS PROJECT | 2026</div>
+            </div>
+            <div class="system-status">
+                <div class="status-node">● ENCRYPTED</div>
+                <div id="timer">00:00:00</div>
+                <div style="color: var(--neon-blue);">AHMED MOHAMED</div>
+            </div>
         </div>
-        <div class="team-link" onclick="flyTo(51.50, -0.12, 'London Branch', 'James Wilson - Tech Lead')">
-            <div class="status"></div> <span>London Office (UK)</span>
+
+        <div class="left-panel">
+            <div class="panel" style="flex: 1; padding: 15px;">
+                <h3 style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--neon-green);">NETWORK_NODES</h3>
+                <div class="team-node" onclick="updateView(30.04, 31.23, 'CAIRO_HQ', 'Sarah Ahmed', 98)">
+                    <div>[NODE_01] CAIRO_HUB</div>
+                    <div style="font-size: 0.6rem; color: #8b949e;">OPS_MANAGER: SARAH_A</div>
+                </div>
+                <div class="team-node" onclick="updateView(51.50, -0.12, 'LONDON_R&D', 'James Wilson', 85)">
+                    <div>[NODE_02] LONDON_R&D</div>
+                    <div style="font-size: 0.6rem; color: #8b949e;">TECH_LEAD: JAMES_W</div>
+                </div>
+                <div class="team-node" onclick="updateView(35.67, 139.65, 'TOKYO_MARKET', 'Yuki Sato', 92)">
+                    <div>[NODE_03] TOKYO_SYNC</div>
+                    <div style="font-size: 0.6rem; color: #8b949e;">CREATIVE: YUKI_S</div>
+                </div>
+            </div>
+            <div class="panel" style="height: 150px; padding: 10px;">
+                <div style="font-size: 0.7rem;">SYSTEM_LOGS:</div>
+                <div id="logs" class="data-stream"></div>
+            </div>
         </div>
-        <div class="team-link" onclick="flyTo(35.67, 139.65, 'Tokyo Team', 'Yuki Sato - Design Director')">
-            <div class="status"></div> <span>Tokyo Creative (Japan)</span>
+
+        <div class="panel main-viewport">
+            <div id="globe-3d"></div>
+            <div id="telemetry" style="position: absolute; top: 20px; right: 20px; text-align: right; pointer-events: none;">
+                <div style="font-size: 2rem; color: #fff;" id="city-display">GLOBAL</div>
+                <div style="color: var(--neon-green);" id="lead-display">STANDBY_MODE</div>
+            </div>
         </div>
-        
-        <h2 style="margin-top: 30px;">SESSION INFO</h2>
-        <p style="font-size: 0.8rem; color: #8b949e;">Leading Virtual Teams Presentation</p>
-        <div class="badge">Presenter: Ahmed Mohamed</div>
+
+        <div class="right-panel">
+            <div class="panel" style="flex: 1; padding: 15px;">
+                <h3 style="font-family: 'Orbitron'; font-size: 0.9rem;">OUTCOME_METRICS</h3>
+                <div id="chart-metrics" style="height: 200px;"></div>
+                <p style="font-size: 0.7rem; line-height: 1.5;">
+                    > Virtual Synergy Index: 0.94<br>
+                    > Latency: 24ms<br>
+                    > Trust factor: High<br>
+                    > DEPI Data Analysis: Operational
+                </p>
+            </div>
+            <div class="panel" style="height: 150px; background: rgba(0, 243, 255, 0.05); padding: 10px;">
+                <div style="font-size: 0.8rem; color: #fff;">QUICK_TAKEAWAY:</div>
+                <div style="font-size: 0.7rem; margin-top: 5px;">"Outcomes over presence. Trust by design. Leadership via data."</div>
+            </div>
+        </div>
+
+        <div class="bottom-panel">
+            <div class="panel" style="padding: 10px;">GRID_STABILITY: 99%</div>
+            <div class="panel" style="padding: 10px;">SYNC_STATUS: ACTIVE</div>
+            <div class="panel" style="padding: 10px;">DATA_FLOW: ENCRYPTED</div>
+            <div class="panel" style="padding: 10px;">LOCATION: MANSOURA_EG</div>
+        </div>
     </div>
 
-    <div class="main-view">
-        <div class="header">
-            <div style="font-weight: bold;">VIRTUAL COMMAND INTERFACE v2.5</div>
-            <div id="clock"></div>
-        </div>
-        <div id="globe-3d"></div>
-        
-        <div id="info-panel" class="info-panel">
-            <h3 id="panel-city" style="margin: 0; color: var(--primary);">City Name</h3>
-            <p id="panel-lead" style="font-size: 0.9rem; color: #fff; margin: 10px 0;">Team Lead Info</p>
-            <hr style="border: 0; border-top: 1px solid var(--border);">
-            <p style="font-size: 0.8rem; color: #8b949e;">Active Projects: Q2 Virtual Scaling, Data Visualization Hub.</p>
-        </div>
-    </div>
-</div>
+    <script>
+        // 1. Three.js Matrix Background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-<script>
-    // 3D Globe Data
-    var data = [{
-        type: 'scattergeo',
-        lon: [31.23, -0.12, 139.65],
-        lat: [30.04, 51.50, 35.67],
-        text: ['Cairo', 'London', 'Tokyo'],
-        mode: 'markers+lines',
-        marker: { size: 12, color: '#58a6ff', symbol: 'diamond', line: {width: 2, color: '#fff'} },
-        line: { width: 2, color: '#00ffcc', opacity: 0.5 }
-    }];
+        const geometry = new THREE.IcosahedronGeometry(20, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.1 });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+        camera.position.z = 30;
 
-    var layout = {
-        geo: { 
-            projection: { type: 'orthographic' }, 
-            bgcolor: '#0d1117', showland: true, landcolor: '#21262d',
-            showocean: true, oceancolor: '#0d1117'
-        },
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 0, r: 0, t: 0, b: 0 }
-    };
+        function animateBG() {
+            requestAnimationFrame(animateBG);
+            sphere.rotation.x += 0.001; sphere.rotation.y += 0.002;
+            renderer.render(scene, camera);
+        }
+        animateBG();
 
-    Plotly.newPlot('globe-3d', data, layout, {responsive: true});
+        // 2. Plotly 3D Globe
+        function renderGlobe(lat = 20, lon = 0, scale = 1) {
+            var data = [{
+                type: 'scattergeo',
+                lon: [31.23, -0.12, 139.65], lat: [30.04, 51.50, 35.67],
+                mode: 'markers+lines',
+                marker: { size: 10, color: '#00f3ff', line: {width: 2, color: '#fff'} },
+                line: { width: 2, color: '#00ff9d', opacity: 0.4 }
+            }];
+            var layout = {
+                geo: { 
+                    projection: { type: 'orthographic', scale: scale }, 
+                    bgcolor: 'rgba(0,0,0,0)', showland: true, landcolor: '#0a141e',
+                    showocean: true, oceancolor: '#020508', center: {lat: lat, lon: lon}
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)', margin: {l:0,r:0,t:0,b:0}
+            };
+            Plotly.newPlot('globe-3d', data, layout, {displayModeBar: false});
+        }
+        renderGlobe();
 
-    function flyTo(lat, lon, city, lead) {
-        var update = {
-            'geo.center.lat': lat,
-            'geo.center.lon': lon,
-            'geo.projection.scale': 2.5
-        };
-        Plotly.relayout('globe-3d', update);
-        
-        document.getElementById('info-panel').style.display = 'block';
-        document.getElementById('panel-city').innerText = city;
-        document.getElementById('panel-lead').innerText = "Team Lead: " + lead;
-    }
+        // 3. UI Interactions
+        function updateView(lat, lon, city, lead, metric) {
+            renderGlobe(lat, lon, 2.5);
+            document.getElementById('city-display').innerText = city;
+            document.getElementById('lead-display').innerText = "LEAD: " + lead;
+            addLog("ACCESSING_NODE: " + city + "...");
+        }
 
-    // Live Clock
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-    }, 1000);
-</script>
+        function addLog(msg) {
+            const logs = document.getElementById('logs');
+            logs.innerHTML += `<div>> ${msg}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
 
+        // Live Timer & Logs
+        setInterval(() => {
+            document.getElementById('timer').innerText = new Date().toLocaleTimeString();
+            if(Math.random() > 0.7) addLog("PKT_LOSS_0%_SYNC_STABLE_" + Math.floor(Math.random()*1000));
+        }, 1000);
+    </script>
 </body>
 </html>

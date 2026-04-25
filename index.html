@@ -3,173 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEURAL COMMAND | AHMED MOHAMED</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Global Command Center | Ahmed Mohamed</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-blue: #00f3ff; --neon-green: #00ff9d; --bg-dark: #020508; --panel-bg: rgba(10, 20, 30, 0.85); }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-dark); color: var(--neon-blue); font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+        :root { --neon-blue: #00f3ff; --neon-green: #00ff9d; --bg: #020508; --card-bg: rgba(10, 20, 30, 0.9); --border: rgba(0, 243, 255, 0.3); }
+        body { margin: 0; background-color: var(--bg); color: #c9d1d9; font-family: 'Inter', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
         
-        #three-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+        /* Fixed Background UI */
+        .ui-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: 1px solid var(--border); pointer-events: none; z-index: 100; box-sizing: border-box; }
+        .header-nav { position: fixed; top: 0; width: 100%; background: rgba(2, 5, 8, 0.9); border-bottom: 1px solid var(--border); padding: 15px 40px; display: flex; justify-content: space-between; z-index: 101; font-family: 'Orbitron'; box-sizing: border-box; }
 
-        .ui-overlay { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 80px 1fr 200px; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; pointer-events: none; }
-        .panel { background: var(--panel-bg); border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 4px; pointer-events: all; position: relative; overflow: hidden; backdrop-filter: blur(10px); }
-        .panel::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-blue), transparent); animation: scan 3s linear infinite; }
-        @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        /* Hero Section with Globe */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-top: 80px; }
+        #globe-3d { width: 100%; height: 60vh; margin-top: 20px; }
 
-        .header { grid-column: 1 / 4; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-family: 'Orbitron'; border-bottom: 2px solid var(--neon-blue); }
-        .system-status { display: flex; gap: 20px; font-size: 0.8rem; }
-        .status-node { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
-
-        .left-panel { grid-row: 2 / 3; display: flex; flex-direction: column; gap: 10px; }
-        .team-node { padding: 15px; border-left: 3px solid transparent; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); }
-        .team-node:hover { background: rgba(0, 243, 255, 0.1); border-left-color: var(--neon-blue); }
+        /* Content Sections */
+        .section { padding: 100px 10%; position: relative; border-bottom: 1px solid var(--border); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
         
-        .main-viewport { grid-column: 2 / 3; grid-row: 2 / 3; position: relative; border: 1px solid rgba(0, 243, 255, 0.1); }
-        #globe-3d { width: 100%; height: 100%; }
-
-        .right-panel { grid-row: 2 / 3; display: flex; flex-direction: column; gap: 10px; }
-        .data-stream { font-size: 0.7rem; color: var(--neon-green); height: 150px; overflow: hidden; position: relative; }
-
-        .bottom-panel { grid-column: 1 / 4; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .glass-card { 
+            background: var(--card-bg); border: 1px solid var(--border); padding: 35px; border-radius: 8px; 
+            backdrop-filter: blur(10px); transition: 0.4s; position: relative;
+        }
+        .glass-card:hover { border-color: var(--neon-blue); transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); }
+        .glass-card h3 { font-family: 'Orbitron'; color: var(--neon-blue); margin-top: 0; font-size: 1.1rem; }
         
-        .glitch { animation: glitch 1s linear infinite; }
-        @keyframes glitch { 2% { transform: skew(2deg); } 5% { transform: skew(-2deg); } 10% { transform: skew(0deg); } }
+        .tech-label { font-family: 'Share Tech Mono'; color: var(--neon-green); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        h2 { font-family: 'Orbitron'; font-size: 2.5rem; letter-spacing: -1px; background: linear-gradient(90deg, #fff, var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Comparison Table */
+        .comp-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.9rem; }
+        .comp-table th, .comp-table td { border: 1px solid var(--border); padding: 15px; text-align: left; }
+        .comp-table th { background: rgba(0, 243, 255, 0.1); color: var(--neon-blue); }
+
+        .footer { padding: 40px; text-align: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-    <canvas id="three-canvas"></canvas>
+    <div class="ui-frame"></div>
+    
+    <div class="header-nav">
+        <div style="color: var(--neon-blue);">SYSTEM: LEAD_V2.0</div>
+        <div style="color: #fff;">AHMED MOHAMED | DEPI ANALYST</div>
+        <div id="clock" style="color: var(--neon-green);">00:00:00</div>
+    </div>
 
-    <div class="ui-overlay">
-        <div class="panel header">
-            <div style="letter-spacing: 5px;">CORE_LEADERSHIP_OS [v4.0.1]</div>
-            <div style="text-align: center;">
-                <div style="font-size: 1.5rem; color: #fff;">LEADING VIRTUAL TEAMS</div>
-                <div style="font-size: 0.7rem;">DEPI DATA ANALYSIS PROJECT | 2026</div>
+    <section class="hero">
+        <div class="tech-label">Initialization Sequence Complete</div>
+        <h1>LEADING VIRTUAL TEAMS</h1>
+        <p style="max-width: 700px; color: #8b949e;">Strategies, Challenges, and Best Practices for the 21st Century Global Workplace.</p>
+        <div id="globe-3d"></div>
+    </section>
+
+    <section class="section">
+        <div class="tech-label">Module 01 // Comparison</div>
+        <h2>The Fundamental Shift</h2>
+        <p>Virtual leadership isn't just about video calls; it's a core competency shifting from <b>managing presence</b> to <b>managing outcomes</b>.</p>
+        
+        <table class="comp-table">
+            <thead>
+                <tr>
+                    <th>Dimension</th>
+                    <th>Traditional Leadership</th>
+                    <th>Virtual Leadership</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Presence</td>
+                    <td>Physical, face-to-face interaction</td>
+                    <td>Digital presence via video/messaging</td>
+                </tr>
+                <tr>
+                    <td>Communication</td>
+                    <td>Informal, spontaneous at the office</td>
+                    <td>Structured, intentional and planned</td>
+                </tr>
+                <tr>
+                    <td>Trust Building</td>
+                    <td>Observation of daily work habits</td>
+                    <td>Results, transparency, and consistency</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="section">
+        <div class="tech-label">Module 02 // Risk Assessment</div>
+        <h2>Key Challenges</h2>
+        <div class="grid">
+            <div class="glass-card">
+                <h3>Communication Gap</h3>
+                <p>Non-verbal cues are often lost. In virtual settings, silence is ambiguous and leads to confusion.</p>
             </div>
-            <div class="system-status">
-                <div class="status-node">● ENCRYPTED</div>
-                <div id="timer">00:00:00</div>
-                <div style="color: var(--neon-blue);">AHMED MOHAMED</div>
+            <div class="glass-card">
+                <h3>Performance Visibility</h3>
+                <p>Leaders cannot observe work directly. We need <b>Data Analysis</b> to detect engagement issues early.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Isolation & Burnout</h3>
+                <p>Remote members risk feeling disconnected. Mental exhaustion is a real threat to virtual synergy.</p>
             </div>
         </div>
+    </section>
 
-        <div class="left-panel">
-            <div class="panel" style="flex: 1; padding: 15px;">
-                <h3 style="font-family: 'Orbitron'; font-size: 0.9rem; color: var(--neon-green);">NETWORK_NODES</h3>
-                <div class="team-node" onclick="updateView(30.04, 31.23, 'CAIRO_HQ', 'Sarah Ahmed', 98)">
-                    <div>[NODE_01] CAIRO_HUB</div>
-                    <div style="font-size: 0.6rem; color: #8b949e;">OPS_MANAGER: SARAH_A</div>
-                </div>
-                <div class="team-node" onclick="updateView(51.50, -0.12, 'LONDON_R&D', 'James Wilson', 85)">
-                    <div>[NODE_02] LONDON_R&D</div>
-                    <div style="font-size: 0.6rem; color: #8b949e;">TECH_LEAD: JAMES_W</div>
-                </div>
-                <div class="team-node" onclick="updateView(35.67, 139.65, 'TOKYO_MARKET', 'Yuki Sato', 92)">
-                    <div>[NODE_03] TOKYO_SYNC</div>
-                    <div style="font-size: 0.6rem; color: #8b949e;">CREATIVE: YUKI_S</div>
-                </div>
+    <section class="section">
+        <div class="tech-label">Module 03 // Strategic Solutions</div>
+        <h2>Success Framework</h2>
+        <div class="grid">
+            <div class="glass-card">
+                <div class="tech-label">Rule 01</div>
+                <h3>Set a Shared Rhythm</h3>
+                <p>Establish regular rituals and check-ins to create predictability and a sense of belonging.</p>
             </div>
-            <div class="panel" style="height: 150px; padding: 10px;">
-                <div style="font-size: 0.7rem;">SYSTEM_LOGS:</div>
-                <div id="logs" class="data-stream"></div>
+            <div class="glass-card">
+                <div class="tech-label">Rule 02</div>
+                <h3>Empower Autonomy</h3>
+                <p>Trust team members to manage their schedules. Micromanagement kills engagement.</p>
+            </div>
+            <div class="glass-card">
+                <div class="tech-label">Rule 03</div>
+                <h3>Outcomes Over Presence</h3>
+                <p>Final takeaway: Leadership is about influence, not oversight. Build trust intentionally.</p>
             </div>
         </div>
+    </section>
 
-        <div class="panel main-viewport">
-            <div id="globe-3d"></div>
-            <div id="telemetry" style="position: absolute; top: 20px; right: 20px; text-align: right; pointer-events: none;">
-                <div style="font-size: 2rem; color: #fff;" id="city-display">GLOBAL</div>
-                <div style="color: var(--neon-green);" id="lead-display">STANDBY_MODE</div>
-            </div>
-        </div>
-
-        <div class="right-panel">
-            <div class="panel" style="flex: 1; padding: 15px;">
-                <h3 style="font-family: 'Orbitron'; font-size: 0.9rem;">OUTCOME_METRICS</h3>
-                <div id="chart-metrics" style="height: 200px;"></div>
-                <p style="font-size: 0.7rem; line-height: 1.5;">
-                    > Virtual Synergy Index: 0.94<br>
-                    > Latency: 24ms<br>
-                    > Trust factor: High<br>
-                    > DEPI Data Analysis: Operational
-                </p>
-            </div>
-            <div class="panel" style="height: 150px; background: rgba(0, 243, 255, 0.05); padding: 10px;">
-                <div style="font-size: 0.8rem; color: #fff;">QUICK_TAKEAWAY:</div>
-                <div style="font-size: 0.7rem; margin-top: 5px;">"Outcomes over presence. Trust by design. Leadership via data."</div>
-            </div>
-        </div>
-
-        <div class="bottom-panel">
-            <div class="panel" style="padding: 10px;">GRID_STABILITY: 99%</div>
-            <div class="panel" style="padding: 10px;">SYNC_STATUS: ACTIVE</div>
-            <div class="panel" style="padding: 10px;">DATA_FLOW: ENCRYPTED</div>
-            <div class="panel" style="padding: 10px;">LOCATION: MANSOURA_EG</div>
-        </div>
+    <div class="footer">
+        DEPI DIGITAL EXCELLENCE PATHWAYS INITIATIVE // DATA ANALYSIS TRACK // 2026
     </div>
 
     <script>
-        // 1. Three.js Matrix Background
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        // Globe Script
+        var data = [{
+            type: 'scattergeo',
+            lon: [31.23, -0.12, 139.65], lat: [30.04, 51.50, 35.67],
+            mode: 'markers+lines',
+            marker: { size: 10, color: '#00f3ff', line: {width: 2, color: '#fff'} },
+            line: { width: 2, color: '#00ff9d', opacity: 0.4 }
+        }];
+        var layout = {
+            geo: { 
+                projection: { type: 'orthographic' }, 
+                bgcolor: 'rgba(0,0,0,0)', showland: true, landcolor: '#0a141e',
+                showocean: true, oceancolor: '#020508'
+            },
+            paper_bgcolor: 'rgba(0,0,0,0)', margin: {l:0,r:0,t:0,b:0}
+        };
+        Plotly.newPlot('globe-3d', data, layout, {displayModeBar: false});
 
-        const geometry = new THREE.IcosahedronGeometry(20, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.1 });
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
-        camera.position.z = 30;
-
-        function animateBG() {
-            requestAnimationFrame(animateBG);
-            sphere.rotation.x += 0.001; sphere.rotation.y += 0.002;
-            renderer.render(scene, camera);
-        }
-        animateBG();
-
-        // 2. Plotly 3D Globe
-        function renderGlobe(lat = 20, lon = 0, scale = 1) {
-            var data = [{
-                type: 'scattergeo',
-                lon: [31.23, -0.12, 139.65], lat: [30.04, 51.50, 35.67],
-                mode: 'markers+lines',
-                marker: { size: 10, color: '#00f3ff', line: {width: 2, color: '#fff'} },
-                line: { width: 2, color: '#00ff9d', opacity: 0.4 }
-            }];
-            var layout = {
-                geo: { 
-                    projection: { type: 'orthographic', scale: scale }, 
-                    bgcolor: 'rgba(0,0,0,0)', showland: true, landcolor: '#0a141e',
-                    showocean: true, oceancolor: '#020508', center: {lat: lat, lon: lon}
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)', margin: {l:0,r:0,t:0,b:0}
-            };
-            Plotly.newPlot('globe-3d', data, layout, {displayModeBar: false});
-        }
-        renderGlobe();
-
-        // 3. UI Interactions
-        function updateView(lat, lon, city, lead, metric) {
-            renderGlobe(lat, lon, 2.5);
-            document.getElementById('city-display').innerText = city;
-            document.getElementById('lead-display').innerText = "LEAD: " + lead;
-            addLog("ACCESSING_NODE: " + city + "...");
-        }
-
-        function addLog(msg) {
-            const logs = document.getElementById('logs');
-            logs.innerHTML += `<div>> ${msg}</div>`;
-            logs.scrollTop = logs.scrollHeight;
-        }
-
-        // Live Timer & Logs
+        // Clock Script
         setInterval(() => {
-            document.getElementById('timer').innerText = new Date().toLocaleTimeString();
-            if(Math.random() > 0.7) addLog("PKT_LOSS_0%_SYNC_STABLE_" + Math.floor(Math.random()*1000));
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
     </script>
 </body>
